@@ -46,6 +46,22 @@ tibble(urn_red = seq(100, 700, by = 100)) %>%
 
 Interpret the meaning of the graphic.
 
+```{r sc1}
+urn_size <- urn %>%
+  nrow()
+
+paddle_size <- 25
+
+joint_distribution <- tibble(urn_red = seq(0, 1000, by = 1))%>%
+  mutate(paddle_red = map(urn_red, ~ rbinom(n = 100, size = paddle_size, prob = ./urn_size))) %>%
+  unnest(paddle_red)
+
+joint_distribution %>%
+  ggplot(aes(x = paddle_red, y = urn_red)) + geom_point()
+
+summary(joint_distribution)
+```
+
 
 
 
@@ -53,6 +69,16 @@ Interpret the meaning of the graphic.
 
 **Prompt:** Using the joint distribution we calculated in Scene 1 as input, calculate your posterior probability density for the number of red beads in the urn, given that that 10 red were sampled in our paddle of 25.
 
+
+```{r sc2}
+joint_distribution %>%
+  filter(paddle_red == 10) %>%
+  group_by(urn_red) %>%
+  summarize(nrows = n(), .groups = "drop") %>%
+  arrange(desc(nrows)) %>%
+  mutate(prob = nrows / sum(nrows)) %>%
+  ggplot(mapping = aes(x = urn_red, y = prob)) + geom_col()
+```
 
 
 
